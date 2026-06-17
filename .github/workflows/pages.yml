@@ -52,6 +52,10 @@ jobs:
           cp apks/*.apk fdroidroot/repo/
           cd fdroidroot
 
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          AAPT2=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -1)
+          echo "Using apksigner: $APKSIGNER"
+
           # Reuse the app's release keystore to sign the repo index (stable fingerprint).
           echo "$KEYSTORE_BASE64" | base64 -d > keystore.p12
 
@@ -66,8 +70,11 @@ jobs:
           repo_keyalias: ${KEY_ALIAS}
           keystorepass: ${KS_PASS}
           keypass: ${KEY_PASS}
+          apksigner: ${APKSIGNER}
+          aapt2: ${AAPT2}
           make_current_version_link: false
           YAML
+          chmod 600 config.yml
 
           fdroid update --create-metadata --pretty --verbose | tee update.log
 
