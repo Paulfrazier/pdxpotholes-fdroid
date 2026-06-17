@@ -1,0 +1,104 @@
+name: Build & deploy F-Droid repo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  REPO_URL: https://paulfrazier.github.io/pdxpotholes-fdroid/repo
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install build-tools (apksigner/aapt for fdroid)
+        run: sdkmanager "build-tools;35.0.0" "platform-tools"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install fdroidserver
+        run: pip install fdroidserver==2.3.1
+
+      - name: Build F-Droid repo
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          mkdir -p fdroidroot/repo
+          cp apks/*.apk fdroidroot/repo/
+          cd fdroidroot
+
+          # Reuse the app's release keystore to sign the repo index (stable fingerprint).
+          echo "$KEYSTORE_BASE64" | base64 -d > keystore.p12
+
+          cat > config.yml <<YAML
+          repo_url: ${REPO_URL}
+          repo_name: PDX Potholes
+          repo_description: >-
+            Personal F-Droid repo for PDX Potholes — file Portland potholes fast,
+            straight to PDX Reporter.
+          archive_older: 0
+          keystore: keystore.p12
+          repo_keyalias: ${KEY_ALIAS}
+          keystorepass: ${KS_PASS}
+          keypass: ${KEY_PASS}
+          make_current_version_link: false
+          YAML
+
+          fdroid update --create-metadata --pretty --verbose | tee update.log
+
+          # Repo fingerprint = SHA-256 of the DER-encoded signing certificate.
+          keytool -exportcert -keystore keystore.p12 -storepass "$KS_PASS" \
+            -alias "$KEY_ALIAS" -file cert.der >/dev/null 2>&1
+          FP=$(sha256sum cert.der | cut -d' ' -f1 | tr 'a-z' 'A-Z')
+          echo "FINGERPRINT=$FP" >> "$GITHUB_ENV"
+          echo "## F-Droid repo built" >> "$GITHUB_STEP_SUMMARY"
+          echo "Add URL: \`${REPO_URL}?fingerprint=$FP\`" >> "$GITHUB_STEP_SUMMARY"
+
+          # Clean the keystore out of the working tree so it can't be published.
+          rm -f keystore.p12 cert.der
+
+      - name: Assemble Pages site
+        run: |
+          set -euo pipefail
+          mkdir -p site/repo
+          cp -r fdroidroot/repo/* site/repo/
+          sed "s|__REPO_URL__|${REPO_URL}|g; s|__FINGERPRINT__|${FINGERPRINT}|g" index.html > site/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

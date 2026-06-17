@@ -1,0 +1,5 @@
+site/
+fdroidroot/
+*.p12
+*.keystore
+.DS_Store

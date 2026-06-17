@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PDX Potholes — F-Droid repo</title>
+<style>
+  :root { --asphalt:#26282B; --deep:#1C1D1F; --card:#303336; --hazard:#F5C212; --text:#F2F2F0; --muted:#9A9C9E; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--asphalt); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; line-height:1.5; }
+  main { max-width:620px; margin:0 auto; padding:32px 20px 60px; }
+  h1 { font-size:26px; font-weight:800; letter-spacing:-.3px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 24px; }
+  .card { background:var(--card); border-radius:16px; padding:18px; margin:16px 0; }
+  .btn { display:inline-block; background:var(--hazard); color:#1a1a1a; font-weight:800;
+    text-decoration:none; padding:14px 18px; border-radius:12px; }
+  code { background:var(--deep); padding:2px 6px; border-radius:6px; word-break:break-all; font-size:13px; }
+  .fp { font-family:ui-monospace,Menlo,monospace; font-size:12px; color:var(--muted); word-break:break-all; }
+  ol { padding-left:20px; } li { margin:6px 0; }
+  a { color:var(--hazard); }
+  .step { font-weight:700; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🕳️ PDX Potholes</h1>
+  <p class="sub">A personal F-Droid repository. Add it in the F-Droid app to install and
+  auto-update the pothole reporter.</p>
+
+  <div class="card">
+    <p class="step">On your Android phone, with the F-Droid app installed:</p>
+    <ol>
+      <li>Tap the button below (or copy the repo URL into F-Droid → Settings → Repositories → ＋).</li>
+      <li>F-Droid adds the repo with its signing fingerprint pre-filled — confirm it.</li>
+      <li>Search <strong>PDX Potholes</strong> and install. Future versions show up as updates.</li>
+    </ol>
+    <p><a class="btn" href="__REPO_URL__?fingerprint=__FINGERPRINT__">Add this repo to F-Droid</a></p>
+  </div>
+
+  <div class="card">
+    <p class="step">Repo URL</p>
+    <p><code>__REPO_URL__</code></p>
+    <p class="step">Fingerprint (SHA-256)</p>
+    <p class="fp">__FINGERPRINT__</p>
+  </div>
+
+  <div class="card">
+    <p class="step">Don't have F-Droid?</p>
+    <p>Install the F-Droid client first from <a href="https://f-droid.org">f-droid.org</a>, then
+    come back and tap “Add this repo”. You can also sideload the latest APK directly from
+    <a href="__REPO_URL__/">the repo folder</a>.</p>
+  </div>
+
+  <p class="sub" style="font-size:13px">PDX Potholes is an independent tool — not affiliated with
+  or endorsed by the City of Portland. Reports file under your own PDX Reporter account.</p>
+</main>
+</body>
+</html>
