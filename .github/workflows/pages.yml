@@ -38,7 +38,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install fdroidserver
-        run: pip install fdroidserver==2.3.1
+        run: pip install "fdroidserver>=2.4"
 
       - name: Build F-Droid repo
         env:
